@@ -1,0 +1,6 @@
+package: github.com/chriswalker/k8s
+import:
+- package: github.com/fatih/color
+  version: v1.7.0
+- package: k8s.io/client-go
+  version: v6.0.0
