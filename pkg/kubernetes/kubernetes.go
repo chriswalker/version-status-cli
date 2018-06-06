@@ -22,7 +22,6 @@ func NewKubernetesClient(k8sContext, configPath string) (*KubernetesClient, erro
 		return nil, errors.Wrap(err, "could not build k8s config")
 	}
 
-	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not build k8s clientset from config")
@@ -55,7 +54,7 @@ func cleanupList(list []types.Pod) map[string]string {
 		}
 		// TODO - can refactor this
 		if (strings.HasPrefix(app, "api") || strings.HasPrefix(app, "svc")) && !strings.HasSuffix(app, "docs-site") {
-			pods[app] = pod.ObjectMeta.Labels["gitCommit"]
+			pods[app] = pod.ObjectMeta.Labels["version"]
 		}
 	}
 

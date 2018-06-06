@@ -19,20 +19,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	// Uncomment the following line to load the gcp plugin (only required to authenticate against GKE clusters).
-	"github.com/fatih/color"
-	"github.com/pkg/errors"
-	types "k8s.io/api/core/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"github.com/chriswalker/version-status-cli/internal/app"
+	//_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 func main() {
@@ -44,17 +35,8 @@ func main() {
 	}
 	flag.Parse()
 
-	stagingServices, _ := getServices("staging", *kubeconfig)
-	fmt.Println("Staging services")
-	for service, version := range stagingServices {
-		fmt.Printf("[%s] %s\n", color.BlueString(service), version)
-	}
-
-	prodServices, _ := getServices("production", *kubeconfig)
-	fmt.Println("\n\nProd services")
-	for service, version := range prodServices {
-		fmt.Printf("[%s] %s\n", color.BlueString(service), version)
-	}
+	app := app.NewApp(*kubeconfig)
+	app.GetVersionStatus()
 
 	// Examples for error handling:
 	// - Use helper functions like e.g. errors.IsNotFound()
@@ -76,6 +58,14 @@ func main() {
 	*/
 }
 
+func homeDir() string {
+	if h := os.Getenv("HOME"); h != "" {
+		return h
+	}
+	return os.Getenv("USERPROFILE") // windows
+}
+
+/*
 func getServices(k8sContext, configPath string) (map[string]string, error) {
 	config, err := buildConfigFromFlags(k8sContext, configPath)
 
@@ -104,12 +94,6 @@ func buildConfigFromFlags(context, kubeconfigPath string) (*rest.Config, error) 
 		}).ClientConfig()
 }
 
-func homeDir() string {
-	if h := os.Getenv("HOME"); h != "" {
-		return h
-	}
-	return os.Getenv("USERPROFILE") // windows
-}
 
 // Returns a de-duped, cleaned up & sorted list of services
 // TODO, better way of doing this & doesn't support int deployments
@@ -136,3 +120,4 @@ func getColourFunc(num int) func(format string, a ...interface{}) string {
 	}
 	return color.New(color.FgRed).SprintfFunc()
 }
+*/
