@@ -11,6 +11,11 @@ type App struct {
 	configPath string
 }
 
+type Services struct {
+	context  string
+	services map[string]string
+}
+
 func NewApp(kubeConfigFilepath string) *App {
 	return &App{
 		configPath: kubeConfigFilepath,
@@ -20,26 +25,25 @@ func NewApp(kubeConfigFilepath string) *App {
 func (a *App) GetVersionStatus() {
 	envs := []string{"staging", "production"}
 
-	c := make(chan map[string]string, 2)
+	c := make(chan Services, 2)
 
 	for _, env := range envs {
 		go a.getServices(env, c)
 	}
 
-	results := make([]map[string]string, 0)
+	results := make(map[string]Services, 0)
 	for i := 0; i < cap(c); i++ {
 		result := <-c
-		results = append(results, result)
+		results[result.context] = result
 	}
 
-	// TODO - resuls may come back in different order; need to tag them
-	versions := a.processResults(results[0], results[1])
+	versions := a.processResults(results[envs[0]].services, results[envs[1]].services)
 
 	outputter := output.NewStdOutputter()
 	outputter.Output(versions)
 }
 
-func (a *App) getServices(env string, result chan<- map[string]string) {
+func (a *App) getServices(env string, result chan<- Services) {
 	client, err := kubernetes.NewKubernetesClient(env, a.configPath)
 	if err != nil {
 		// TODO
@@ -52,7 +56,10 @@ func (a *App) getServices(env string, result chan<- map[string]string) {
 		fmt.Println(err)
 	}
 
-	result <- pods
+	result <- Services{
+		context:  env,
+		services: pods,
+	}
 }
 
 func (a *App) processResults(staging, production map[string]string) []output.Version {
