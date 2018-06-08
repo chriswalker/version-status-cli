@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/chriswalker/version-status-cli/internal/output"
 	"github.com/chriswalker/version-status-cli/pkg/kubernetes"
@@ -21,21 +20,15 @@ func NewApp(kubeConfigFilepath string) *App {
 func (a *App) GetVersionStatus() {
 	envs := []string{"staging", "production"}
 
-	c := make(chan map[string]string)
-	var wg sync.WaitGroup
+	c := make(chan map[string]string, 2)
 
 	for _, env := range envs {
-		wg.Add(1)
-		go a.getServices(env, c, &wg)
+		go a.getServices(env, c)
 	}
 
-	go func() {
-		wg.Wait()
-		close(c)
-	}()
-
 	results := make([]map[string]string, 0)
-	for result := range c {
+	for i := 0; i < cap(c); i++ {
+		result := <-c
 		results = append(results, result)
 	}
 
@@ -44,19 +37,9 @@ func (a *App) GetVersionStatus() {
 
 	outputter := output.NewStdOutputter()
 	outputter.Output(versions)
-
-	// Output - TODO: move into output package
-	/*
-		for _, version := range versions {
-			fn := getColourFunc(version)
-			fmt.Printf("%s\n", fn("[%s] Staging: %s - Prod: %s", version.ServiceName, version.StagingVersion, version.ProdVersion))
-		}
-	*/
 }
 
-func (a *App) getServices(env string, result chan<- map[string]string, wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func (a *App) getServices(env string, result chan<- map[string]string) {
 	client, err := kubernetes.NewKubernetesClient(env, a.configPath)
 	if err != nil {
 		// TODO
