@@ -34,7 +34,7 @@ func (a *App) GetVersionStatus() {
 	c := make(chan services, 2)
 
 	for _, env := range envs {
-		go a.getservices(env, c)
+		go a.getServices(env, c)
 	}
 
 	results := make(map[string]services, 0)
@@ -53,7 +53,7 @@ func (a *App) GetVersionStatus() {
 	outputter.Output(versions)
 }
 
-func (a *App) getservices(env string, result chan<- services) {
+func (a *App) getServices(env string, result chan<- services) {
 	client, err := kubernetes.NewKubernetesClient(env, a.configPath)
 	if err != nil {
 		result <- services{
