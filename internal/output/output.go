@@ -17,7 +17,7 @@ type Version struct {
 }
 
 type Outputter interface {
-	Output([]Version)
+	Output([]string, []Version)
 }
 
 type StdOutputter struct{}
@@ -26,9 +26,9 @@ func NewStdOutputter() *StdOutputter {
 	return &StdOutputter{}
 }
 
-func (s *StdOutputter) Output(versions []Version) {
+func (s *StdOutputter) Output(contexts []string, versions []Version) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 20, 0, '\t', 0)
-	fmt.Fprintln(w, "Service\tStaging Version\tProd Version\t")
+	fmt.Fprintf(w, "Service\t%s\t%s\t\n", contexts[0], contexts[1])
 	for _, ver := range versions {
 		fn := getColourFunc(ver)
 		fmt.Fprintf(w, "%s\t%s", ver.ServiceName, fn("%s\t%s\t\n", ver.StagingVersion, ver.ProdVersion))

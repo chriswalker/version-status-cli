@@ -28,13 +28,11 @@ func NewApp(kubeConfigFilepath string) *App {
 	}
 }
 
-func (a *App) GetVersionStatus() {
-	envs := []string{"staging", "production"}
-
+func (a *App) GetVersionStatus(contexts []string) {
 	c := make(chan services, 2)
 
-	for _, env := range envs {
-		go a.getServices(env, c)
+	for _, context := range contexts {
+		go a.getServices(context, c)
 	}
 
 	results := make(map[string]services, 0)
@@ -47,14 +45,14 @@ func (a *App) GetVersionStatus() {
 		results[result.context] = result
 	}
 
-	versions := a.processResults(results[envs[0]].services, results[envs[1]].services)
+	versions := a.processResults(results[contexts[0]].services, results[contexts[1]].services)
 
 	outputter := output.NewStdOutputter()
-	outputter.Output(versions)
+	outputter.Output(contexts, versions)
 }
 
-func (a *App) getServices(env string, result chan<- services) {
-	client, err := kubernetes.NewKubernetesClient(env, a.configPath)
+func (a *App) getServices(context string, result chan<- services) {
+	client, err := kubernetes.NewKubernetesClient(context, a.configPath)
 	if err != nil {
 		result <- services{
 			err: errors.Wrap(err, "could not create k8s client"),
@@ -65,13 +63,13 @@ func (a *App) getServices(env string, result chan<- services) {
 	pods, err := client.GetPods()
 	if err != nil {
 		result <- services{
-			err: errors.Wrapf(err, "could not get list of pods for context '%s'", env),
+			err: errors.Wrapf(err, "could not get list of pods for context '%s'", context),
 		}
 		return
 	}
 
 	result <- services{
-		context:  env,
+		context:  context,
 		services: pods,
 	}
 }
