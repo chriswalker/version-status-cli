@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	first  = flag.String("first", "", "(required) first k8s context")
-	second = flag.String("second", "", "(required) second k8s context")
+	first     = flag.String("first", "", "(required) first k8s context")
+	second    = flag.String("second", "", "(required) second k8s context")
+	diffsonly = flag.Bool("diffsonly", false, "(optional) whether to report only services with version differences, or all services")
 )
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 		os.Exit(1)
 	}
 	app := app.NewApp(*kubeconfig)
-	app.GetVersionStatus([]string{*first, *second})
+	app.GetVersionStatus([]string{*first, *second}, *diffsonly)
 }
 
 func homeDir() string {

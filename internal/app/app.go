@@ -28,7 +28,7 @@ func NewApp(kubeConfigFilepath string) *App {
 	}
 }
 
-func (a *App) GetVersionStatus(contexts []string) {
+func (a *App) GetVersionStatus(contexts []string, diffsonly bool) {
 	c := make(chan services, 2)
 
 	for _, context := range contexts {
@@ -45,7 +45,7 @@ func (a *App) GetVersionStatus(contexts []string) {
 		results[result.context] = result
 	}
 
-	versions := a.processResults(results[contexts[0]].services, results[contexts[1]].services)
+	versions := a.processResults(results[contexts[0]].services, results[contexts[1]].services, diffsonly)
 
 	outputter := output.NewStdOutputter()
 	outputter.Output(contexts, versions)
@@ -74,10 +74,14 @@ func (a *App) getServices(context string, result chan<- services) {
 	}
 }
 
-func (a *App) processResults(staging, production map[string]string) []output.Version {
+func (a *App) processResults(staging, production map[string]string, diffsonly bool) []output.Version {
 	var versions []output.Version
 
 	for service, version := range staging {
+		// if stage ver == prod ver && difssonly == true continue
+		if diffsonly == true && version == production[service] {
+			continue
+		}
 		ver := output.Version{
 			ServiceName:    service,
 			StagingVersion: version,
@@ -85,9 +89,21 @@ func (a *App) processResults(staging, production map[string]string) []output.Ver
 		if prodVersion, ok := production[service]; ok != false {
 			ver.ProdVersion = prodVersion
 		}
+		/*
+			if diffsonly == true {
+				if ver.StagingVersion != ver.ProdVersion {
+					versions = append(versions, ver)
+				}
+			} else {
+				versions = append(versions, ver)
+			}
+		*/
 
 		versions = append(versions, ver)
+
 	}
+
+	// TODO: Sort results
 
 	return versions
 }
