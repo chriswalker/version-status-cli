@@ -32,6 +32,9 @@ func NewApp(kubeConfigFilepath string) *App {
 func (a *App) GetVersionStatus(contexts []string, diffsonly bool) {
 	c := make(chan services, 2)
 
+	spinner := output.NewSpinner()
+	spinner.Prefix = "Getting pods "
+	spinner.Start()
 	for _, context := range contexts {
 		go a.getServices(context, c)
 	}
@@ -45,6 +48,8 @@ func (a *App) GetVersionStatus(contexts []string, diffsonly bool) {
 		}
 		results[result.context] = result
 	}
+
+	spinner.Stop()
 
 	versions := a.processResults(results[contexts[0]].services, results[contexts[1]].services, diffsonly)
 
@@ -79,10 +84,10 @@ func (a *App) processResults(staging, production map[string]string, diffsonly bo
 	var versions []output.Version
 
 	for service, version := range staging {
-		// if stage ver == prod ver && difssonly == true continue
 		if diffsonly == true && version == production[service] {
 			continue
 		}
+
 		ver := output.Version{
 			ServiceName:    service,
 			StagingVersion: version,
@@ -90,22 +95,13 @@ func (a *App) processResults(staging, production map[string]string, diffsonly bo
 		if prodVersion, ok := production[service]; ok != false {
 			ver.ProdVersion = prodVersion
 		}
-		/*
-			if diffsonly == true {
-				if ver.StagingVersion != ver.ProdVersion {
-					versions = append(versions, ver)
-				}
-			} else {
-				versions = append(versions, ver)
-			}
-		*/
 
 		versions = append(versions, ver)
 	}
 
-	// TODO: Sort results
 	sort.Slice(versions, func(i, j int) bool {
 		return versions[i].ServiceName < versions[j].ServiceName
 	})
+
 	return versions
 }
