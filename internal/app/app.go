@@ -33,7 +33,7 @@ func (a *App) GetVersionStatus(contexts []string, diffsonly bool) {
 	c := make(chan services, 2)
 
 	spinner := output.NewSpinner()
-	spinner.Prefix = "Getting pods "
+	spinner.Prefix = "Getting pods"
 	spinner.Start()
 	for _, context := range contexts {
 		go a.getServices(context, c)

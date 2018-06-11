@@ -24,7 +24,7 @@ func (s *spinner) Start() {
 				case <-s.doneChan:
 					return
 				default:
-					fmt.Printf("\rGetting pods %c", r)
+					fmt.Printf("\r%s %c", s.Prefix, r)
 					time.Sleep(100 * time.Millisecond)
 				}
 			}
