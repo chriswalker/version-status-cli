@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/chriswalker/version-status-cli/internal/output"
 	"github.com/chriswalker/version-status-cli/pkg/kubernetes"
@@ -100,10 +101,11 @@ func (a *App) processResults(staging, production map[string]string, diffsonly bo
 		*/
 
 		versions = append(versions, ver)
-
 	}
 
 	// TODO: Sort results
-
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i].ServiceName < versions[j].ServiceName
+	})
 	return versions
 }
