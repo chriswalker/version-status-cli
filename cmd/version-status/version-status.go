@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/chriswalker/version-status-cli/internal/app"
-	//_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 var (
