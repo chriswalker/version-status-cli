@@ -1,11 +1,13 @@
-hash: 3a3b371af7fd22dfb5022191dd3e5c36f5ca571fc6231b7cae7df80f88832935
-updated: 2018-06-04T21:45:32.677264+01:00
+hash: 2410d95679738b83c6f92727ce184b194b417d6d43827904905356ec02ff3841
+updated: 2018-06-17T21:00:54.592891+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
   subpackages:
   - compute/metadata
   - internal
+- name: github.com/chriswalker/spinner
+  version: b6f9c6bef9fe887c8a2b4374c3d809eebb2217cd
 - name: github.com/emicklei/go-restful
   version: ff4f55a206334ef123e4f79bbf348980da81ca46
   subpackages:
@@ -119,7 +121,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/appengine
-  version: b9aad5d628b283f265adf8d3557faae187a8d015
+  version: b1f26356af11148e710935ed1ac8a7f5702c7612
   subpackages:
   - internal
   - internal/app_identity

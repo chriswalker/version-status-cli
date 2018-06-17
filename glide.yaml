@@ -4,3 +4,5 @@ import:
   version: v1.7.0
 - package: k8s.io/client-go
   version: v6.0.0
+- package: github.com/chriswalker/spinner
+  version: v1.0.0

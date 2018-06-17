@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/chriswalker/spinner"
 	"github.com/chriswalker/version-status-cli/internal/output"
 	"github.com/chriswalker/version-status-cli/pkg/kubernetes"
 	"github.com/pkg/errors"
@@ -32,9 +33,10 @@ func NewApp(kubeConfigFilepath string) *App {
 func (a *App) GetVersionStatus(contexts []string, diffsonly bool) {
 	c := make(chan services, 2)
 
-	spinner := output.NewSpinner()
-	spinner.Prefix = "Getting pods"
+	spinner := spinner.NewSpinner()
+	spinner.Prefix = "Getting pods "
 	spinner.Start()
+
 	for _, context := range contexts {
 		go a.getServices(context, c)
 	}
