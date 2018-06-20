@@ -1,5 +1,5 @@
-hash: 2410d95679738b83c6f92727ce184b194b417d6d43827904905356ec02ff3841
-updated: 2018-06-17T21:00:54.592891+01:00
+hash: 32e30fe5764dedca38ca1c202c292d1dec306d264a98f56c5d187c876c2494d5
+updated: 2018-06-20T21:36:23.090647+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -12,8 +12,6 @@ imports:
   version: ff4f55a206334ef123e4f79bbf348980da81ca46
   subpackages:
   - log
-- name: github.com/fatih/color
-  version: 5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-openapi/jsonpointer
@@ -67,10 +65,6 @@ imports:
   - buffer
   - jlexer
   - jwriter
-- name: github.com/mattn/go-colorable
-  version: efa589957cd060542a26d2dd7832fd6a6c6c3ade
-- name: github.com/mattn/go-isatty
-  version: 6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pkg/errors
