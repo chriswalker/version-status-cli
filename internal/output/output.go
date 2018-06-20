@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
-
-	"github.com/fatih/color"
 )
 
 type Version struct {
@@ -26,40 +24,54 @@ func NewStdOutputter() *StdOutputter {
 	return &StdOutputter{}
 }
 
+const (
+	Reset  string = "\x1b[0000m"
+	Blue   string = "\x1b[0034m"
+	Red    string = "\x1b[0031m"
+	Yellow string = "\x1b[0033m"
+	Green  string = "\x1b[0032m"
+)
+
 func (s *StdOutputter) Output(contexts []string, versions []Version) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 20, 0, '\t', 0)
-	fmt.Fprintf(w, "Service\t%s\t%s\t\n", contexts[0], contexts[1])
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+
+	// Little hacky; tabwriter doesn't recognise colour escape sequences and so doesn't calculate
+	// tabbing correctly; ensure the header row has the same number of escape sequences as the
+	// data rows, by wrapping a couple of columns in the 'reset' code
+	fmt.Fprintf(w, "Service\t%s\t%s\t\n", colour(Reset, contexts[0]), colour(Reset, contexts[1]))
+
 	for _, ver := range versions {
-		fn := getColourFunc(ver)
-		fmt.Fprintf(w, "%s\t%s", ver.ServiceName, fn("%s\t%s\t\n", ver.StagingVersion, ver.ProdVersion))
+		c := getColour(ver)
+		fmt.Fprintf(w, "%s\t%s\t%s\t\n", ver.ServiceName, colour(c, ver.StagingVersion), colour(c, ver.ProdVersion))
 	}
+
 	w.Flush()
 }
 
-func getColourFunc(version Version) func(format string, a ...interface{}) string {
+func getColour(version Version) string {
 	lv, err := stringSplitToIntSplit(strings.Split(strings.Split(version.StagingVersion, "-")[0], "."))
 	if err != nil {
-		return color.New(color.FgBlue).SprintfFunc()
+		return Blue
 	}
 	rv, err := stringSplitToIntSplit(strings.Split(strings.Split(version.ProdVersion, "-")[0], "."))
 	if err != nil {
-		return color.New(color.FgBlue).SprintfFunc()
+		return Blue
 	}
 
 	switch {
 	case lv[0] != rv[0]:
-		return color.New(color.FgRed).SprintfFunc()
+		return Red
 	case lv[1] == rv[1] && lv[2] == rv[2]:
-		return color.New(color.FgGreen).SprintfFunc()
+		return Green
 	case lv[1]-rv[1] > 1 || lv[1]-rv[1] < -1:
-		return color.New(color.FgRed).SprintfFunc()
+		return Red
 	case lv[1]-rv[1] < 2 || lv[1]-rv[1] > -2:
-		return color.New(color.FgYellow).SprintfFunc()
+		return Yellow
 	case lv[2] != rv[2]:
-		return color.New(color.FgYellow).SprintfFunc()
+		return Yellow
 	}
 
-	return color.New(color.FgBlue).SprintfFunc()
+	return Blue
 }
 
 func stringSplitToIntSplit(strings []string) (ints []int, err error) {
@@ -72,4 +84,9 @@ func stringSplitToIntSplit(strings []string) (ints []int, err error) {
 	}
 
 	return ints, err
+}
+
+// colour wraps the supplied string with the supplied colour and reset codes
+func colour(colour, s string) string {
+	return fmt.Sprintf("%s%s%s", colour, s, Reset)
 }
