@@ -33,19 +33,23 @@ const (
 )
 
 func (s *StdOutputter) Output(contexts []string, versions []Version) {
+	fmt.Printf("Version differences between %s and %s\n\n", contexts[0], contexts[1])
+
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 	// Little hacky; tabwriter doesn't recognise colour escape sequences and so doesn't calculate
 	// tabbing correctly; ensure the header row has the same number of escape sequences as the
 	// data rows, by wrapping a couple of columns in the 'reset' code
-	fmt.Fprintf(w, "Service\t%s\t%s\t\n", colour(Reset, contexts[0]), colour(Reset, contexts[1]))
+	fmt.Fprintf(w, "\tService\t%s\t%s\t\n", colour(Reset, contexts[0]), colour(Reset, contexts[1]))
 
 	for _, ver := range versions {
 		c := getColour(ver)
-		fmt.Fprintf(w, "%s\t%s\t%s\t\n", ver.ServiceName, colour(c, ver.StagingVersion), colour(c, ver.ProdVersion))
+		fmt.Fprintf(w, "\t%s\t%s\t%s\t\n", ver.ServiceName, colour(c, ver.StagingVersion), colour(c, ver.ProdVersion))
 	}
 
 	w.Flush()
+
+	fmt.Println()
 }
 
 func getColour(version Version) string {
